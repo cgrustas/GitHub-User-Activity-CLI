@@ -1,7 +1,7 @@
 # Coleman Grustas
 # 12/28/24
 
-from github_activity_annotated import get_username
+from github_activity_annotated import get_username, get_user_activities
 import json
 import unittest
 import unittest.mock
@@ -180,24 +180,81 @@ class TestGitHubActivityCLI(unittest.TestCase):
         """Test successful API response from get_user_activities"""
         username = "testuser"
         
-        # Create a mock response object that behaves like an HTTP response
-        # region: TODO: What is JSON.encode()? What is 'utf-8'? 
+        # Create a mock HTTPResponse
+        # region: TODO: What is UTF-8? 
+            # UTF-8 (Unicode Transformation Format - 8-bit) is a commonly used Unicode character set 
+            # that defines how characters are turned into bytes
+            # We use UTF-8 here because it's the most common encoding on the web, and consequently, 
+            # GitHub's API returns data in UTF-8 encoding
         # endregion
-        # region: TODO: Why is return_value an attribute of read? Why is read an attribute of mock_response?
+        # region: TODO: What is encode()? 
+            # encode : String -> Bytes (raw binary data)
+            # translates human readable text into computer-readable data
+        # endregion
+        # region: What is the return_value attribute in Mock objects? 
+            # return_value is a built in attribute of every Mock that sets the return value when calling the mock object
+            # In this case, we use return_value to set the value of our mock_response.read() to the byte
+            # format of our sample_events_data
+            # We do this so that we don't have to make a request to GitHub every time we want to test our function
+        # endregion
+        mock_response = unittest.mock.Mock()
+        data_as_json_str = json.dumps(self.sample_events_data)
+        data_as_bytes = data_as_json_str.encode('utf-8')
+        mock_response.read.return_value = data_as_bytes
 
-#        mock_response = unittest.mock.Mock()
-#        data_in_json_str = json.dumps(self.sample_events_data)
-#        data_in_bytes = data_in_json_str.encode('utf-8') # converts strings to bytes
+        # Mock the urlopen function to return our mock response
+        # region: Why does setting 'mock_urlopen.__enter__' work if 'with' calls __enter__ immediately?
+            # 'with' statements typically call __enter__ immediately upon entering the block. 
+            # However, "with" statements treat unittest.mock.patch() objects differently. 
+            # This is because the mock object is just a replacement behavior, not a real resource that needs managing. 
 
-        # region: TODO: What is the 'return_value' attribute in Mock objects? 
-        # region: TODO: What is mock_response.read? Why is read an attribute of mock_response? 
-        mock_response.read.return_value = json.dumps(self.sample_events_data).encode('utf-8')
+            # With mock.patch() objects, '__enter__' is not called until the code under test uses 
+            # 'urllib.request.urlopen' under a with statement
+            # So when we use '...as mock_urlopen', the mock is set up, but '__enter__' is not called,
+            # because the replacement has not yet not occured. 
+
+            # Therefore, we can configure '__enter__' to set up what will happen WHEN enter is called, not
+            # after it's called. 
+            
+            # In this case, when __enter__ is called in 'get_user_activities', it will receive 'mock_response'. 
+
+        # endregion
+        # region: If the mock.patch() does not manage memory, why does it need to be placed in a "with" block? 
+            # Regular 'with' is about resource management (open/close files, lock/unlock resources)
+            # mock.patch 'with' is about scope management
+            # We use 'with' in this case to define where the mock replacement is active
+        # endregion
+        with unittest.mock.patch('urllib.request.urlopen') as mock_urlopen:
+            mock_urlopen.return_value.__enter__.return_value = mock_response
+            result = get_user_activities(username)
+            
+            # Verify the result is a list and matches our sample data
+            self.assertIsInstance(result, list)
+            self.assertEqual(result, self.sample_events_data)
 
 
     # TODO: Write failed test for get_user_activities()
+    # This specifically tests our error handling code, and ensures that an Exception is raised
     def test_get_user_activities_error(self):
         # probably use assertIsInstance(a, b) method in unittest framework
-        pass
+        username = "nonexistentuser"
+
+        with unittest.mock.patch('urllib.request.urlopen') as mock_urlopen:
+            # region: TODO: What is mock.side_effect? 
+                # mock.side_effect lets you define what happens when the mock object occurs. It can: 
+                    # Raise an Exception
+                    # Return different values on successive calls
+                    # Run a function (if the Mock is a function)
+            # endregion
+            mock_urlopen.side_effect = Exception("API Error")
+            result = get_user_activities(username)
+
+            self.assertIsInstance(result, str)
+            # region: TODO: What is startswith()? 
+                # startswith(prefix) -> Boolean
+                # Returns True if a String starts with a specific prefix, False otherwise
+            # endregion
+            self.assertTrue(result.startswith("Error:"))
 
 
 if __name__ == '__main__':

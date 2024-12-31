@@ -74,7 +74,7 @@ def parse_arguments():
 
 
 
-# get_user_activities : String -> Dictionary
+# get_user_activities : String -> Dictionary(?)
 # Takes in a github username, and fetches the user’s recent activity using the GitHub API
 # Returns a JSON representation of events for a user
 def get_user_activities(username):
