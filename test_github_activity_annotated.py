@@ -1,10 +1,24 @@
-# Coleman Grustas
-# 12/28/24
+"""
+Test Suite for GitHub Activity CLI Tool
+
+This module contains unit tests for the GitHub Activity CLI tool,
+testing both successful and error cases for username parsing and
+GitHub API interactions.
+
+Author: Coleman Grustas
+Date: 12/28/24
+"""
+
 
 from github_activity_annotated import get_username, get_user_activities
+import io
 import json
 import unittest
 import unittest.mock
+
+"""
+
+"""
 
 # region: Additional Features
     # Consider adding a test for when an empty string is passed as the username
@@ -20,9 +34,40 @@ import unittest.mock
     # It also can automatically find and run tests. Any method that starts with test_ is considered a test. 
 # endregion:
 class TestGitHubActivityCLI(unittest.TestCase):
+    """
+    A test suite used to verify the GitHub Activity CLI functionality.
+
+    Attributes
+    ----------
+    sample_events_data : list
+        Mock GitHub API response containing three events:
+        - A PushEvent with 3 commits
+        - An IssuesEvent for a new issue
+        - A WatchEvent for repository starring
+        Used as test fixture across multiple test methods
+
+    Methods
+    -------
+    setUp()
+        Initializes test fixtures before each test method
+    test_get_username_valid()
+        Tests successful username extraction from command line
+    test_get_username_no_args()
+        Tests handling of missing command line arguments
+    test_get_user_activities_success()
+        Tests successful GitHub API interaction
+    test_get_user_activities_error()
+        Tests error handling for failed API requests
+    """
     # TODO: add a docstring to the test class itself to describe what it's testing
     def setUp(self): 
-        """Create a stub for the GitHub user activity JSON data"""
+        """
+        Set up test fixtures before each test method.
+
+        Creates a sample GitHub API response structure containing
+        three different types of events (Push, Issues, Watch) that
+        will be used to verify API response handling.
+        """
         # region: How did you choose the three specific events for the events data stub?
             # I included three different event types (PushEvent, IssuesEvent, WatchEvent), because they correspond to the example output
         # endregion:
@@ -102,7 +147,7 @@ class TestGitHubActivityCLI(unittest.TestCase):
         ]
 
     def test_get_username_valid(self):
-        """Test get_username with valid username"""
+        """Test successful username extraction from command line arguments"""
         # region: Why hard code the command line arguments in a list?
             # I hard coded the command line arguments in a list because that is what 
         # endregion:
@@ -150,7 +195,7 @@ class TestGitHubActivityCLI(unittest.TestCase):
 
 
     def test_get_username_no_args(self): 
-        """Test get_username with no command line arguments"""
+        """Test handling of missing command line arguments"""
         test_args = ['script.py']  # Only program name, no username
         with unittest.mock.patch('sys.argv', test_args):
             # region: What is this code doing? 
@@ -177,7 +222,7 @@ class TestGitHubActivityCLI(unittest.TestCase):
 
     # TODO: Write successful test for get_user_activities()
     def test_get_user_activities_success(self): 
-        """Test successful API response from get_user_activities"""
+        """Test successful GitHub API interaction and response parsing"""
         username = "testuser"
         
         # Create a mock HTTPResponse
@@ -236,7 +281,7 @@ class TestGitHubActivityCLI(unittest.TestCase):
     # TODO: Write failed test for get_user_activities()
     # This specifically tests our error handling code, and ensures that an Exception is raised
     def test_get_user_activities_error(self):
-        # probably use assertIsInstance(a, b) method in unittest framework
+        """Test error handling for failed GitHub API requests"""
         username = "nonexistentuser"
 
         with unittest.mock.patch('urllib.request.urlopen') as mock_urlopen:
@@ -256,6 +301,59 @@ class TestGitHubActivityCLI(unittest.TestCase):
             # endregion
             self.assertTrue(result.startswith("Error:"))
 
+def test_display_user_activity_success(self):
+    """Test that the user activity is displayed correctly"""
+    # Arrange: Use the sample data already defined in setUp()
+    expected_output = [
+        "Pushed 3 commits to kamranahmedse/developer-roadmap",
+        "Opened a new issue in kamranahmedse/developer-roadmap",
+        "Starred kamranahmedse/developer-roadmap"
+    ]
+
+    # TODO: Act & Assert: Capture stdout and verify output
+    # region: What is sys.stdout? 
+        # sys.stdout is Python's standard output stream
+        # An output stream is a sequence of data that carries data from one place to another, 
+        # typically from your program to your terminal screen (print() -> sys.stdout -> Terminal).
+        # In this case, we're using unittest.mock.patch to replace the sys.stdout to a StringIO buff
+        # In this case, we're redirecting the stream (["Hello"] -> sys.stdout -> StringIO buffer)
+    # endregion
+    # region: What is io.StringIO? 
+        # StringIO is an in-memory file-like object 
+        # In this case, we use it to replace a file-like object for testing purposes
+    # endregion
+    # region: What is a file-like object? 
+        # A file-like object supports file-like methods, such as: 
+            # .read() (reading data, or opening the stream)
+            # .write() (writing data)
+            # .close() (closing the stream)
+        # Examples of file-like objects: 
+            # actual files
+            # sys.stdout, sys.stdin, sys.stderr
+            # io.StringIO, io.BytesIO (in-memory text/binary streams)
+    # endregion
+    with unittest.mock.patch('sys.stdout', new=io.StringIO()) as mock_stdout:
+        display_user_activity(self.sample_events_data) # redirects output stream to mock_stdout
+
+        # strip() removes whitespace, split() separates each event into list of substrings
+        actual_output = mock_stdout.getvalue().strip().split('\n')
+        self.assertEqual(actual_output, expected_output)
+
+def test_display_user_activity_error(self):
+    """Test handling of error response from API"""
+    with unittest.mock.patch('sys.stdout', new=io.StringIO()) as mock_stdout:
+        display_user_activity("invalidresponse") # redirects output stream to mock_stdout
+        assertEqual(
+            mock_stdout.getvalue().strip(),
+            "Error: Unable to display GitHub activity"
+        )
+
+
+
+
+
+
+    
 
 if __name__ == '__main__':
     unittest.main() # runs all tests just by running the file

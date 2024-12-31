@@ -1,40 +1,65 @@
-# Coleman Grustas
-# 12/28/24
-# GitHub User Activity CLI
-# Use GitHub API to fetch user activity and display it in the terminal.
+"""
+GitHub User Activity CLI Tool
 
-# TODO: add proper Signatures/Purpose Statements for functions
-# 
+A command-line interface tool that fetches and displays GitHub user activity
+using the GitHub API. This tool allows users to view recent GitHub events
+for any specified username.
+
+Author: Coleman Grustas
+Date: 12/30/24
+
+Project inspired by roadmap.sh's Python Projects
+(https://roadmap.sh/projects/github-user-activity)
+
+Environment Variables:
+    GITHUB_USER_ACTIVITY_CLI_TOKEN (required): GitHub API authentication token
+        Current token expires: 2025-01-27
+
+Constraints: 
+    - Do not use any external libraries or frameworks to fetch the GitHub activity.
+
+Future Enhancements: 
+    - Add error handling for empty string input in 'get_username()'
+    - Filter the activity by event type.
+    - Display the activity in a more structured format.
+    - Cache the fetched data to improve performance.
+    - Explore other endpoints of the GitHub API to fetch additional information about the user or their repositories.
+"""
+
+# region: TODO: What is an environment variable? 
 
 import argparse
 import json
 import os # for the authentication token
 import urllib.request
 
-# region: Additional Notes
-# GITHUB_USER_ACTIVITY_CLI_TOKEN: Expires 1/27/25
-# Handle errors gracefully, such as invalid usernames or API failures.
-# Constraints: Do not use any external libraries or frameworks to fetch the GitHub activity.
-# endregion:
-
 def main():
-    # accept the GitHub username as an argument from the command line
+    """
+    Main entry point for the GitHub Activity CLI tool.
+    Gets the username, fetches activities, and displays results.
+    """
     username = get_username()
     print(username)
 
     # fetch the user’s recent activity using the GitHub API
-    user_activities = get_user_activities(username)
-    print(user_activities) # stop and test function before continuing with the code 
+    user_activity = get_user_activity(username)
 
-    # TODO: display the GitHub API in the terminal
+    # TODO(cgrustas): Display the fetched activity in the terminal
+#    display_user_activity(user_activity)
     
-
-# get_username : Void -> String
 def get_username():
+    """
+    Retrieves GitHub username from command line arguments.
+
+    Returns:
+        str: The GitHub username provided as a command line argument
+
+    Raises:
+        SystemExit: If no username is provided in command line arguments
+    """
     args = parse_arguments() 
     return args.username
 
-# parse_arguments : Void -> Namespace(username='<whatever_username_was_input>')
 # Interpretation: parses the arguments that are provided when running the CLI
 # region: Namespace Learning Notes
 # A Namespace is an object where each defined argument becomes an attribute. 
@@ -44,6 +69,15 @@ def get_username():
 # Interpretation: parses the arguments that are provided when running the CLI
 # endregion:
 def parse_arguments():
+    """
+    Sets up and parses command line arguments.
+
+    Returns:
+        argparse.Namespace: Parsed command line arguments containing the username
+
+    Raises:
+        SystemExit: If required arguments are missing or invalid
+    """
     # region: ArgumentParser Learning Notes
     # An ArgumentParser helps process command-line arguments
         # add_argument(), which tells the parser what to expect
@@ -70,14 +104,21 @@ def parse_arguments():
     # endregion:
     return parser.parse_args()
 
+def get_user_activity(username):
+    """
+    Fetches recent GitHub activities for the specified user.
 
+    Args:
+        username (str): GitHub username to fetch activities for
 
+    Returns:
+        list[dict]: List of GitHub events if successful
+        str: Error message if the request fails
 
-
-# get_user_activities : String -> Dictionary(?)
-# Takes in a github username, and fetches the user’s recent activity using the GitHub API
-# Returns a JSON representation of events for a user
-def get_user_activities(username):
+    Note:
+        Requires GITHUB_USER_ACTIVITY_CLI_TOKEN environment variable to be set
+        for authentication.
+    """
     # add path parameter to url
     url = f"https://api.github.com/users/{username}/events" 
 
@@ -131,6 +172,35 @@ def get_user_activities(username):
     except Exception as e:    
         return f"Error: {str(e)}" 
     
+
+    """
+    Fetches recent GitHub activities for the specified user.
+
+    Args:
+        username (str): GitHub username to fetch activities for
+
+    Returns:
+        list[dict]: List of GitHub event dictionaries
+        str: Error message if the request fails
+
+    Note:
+        Requires GITHUB_USER_ACTIVITY_CLI_TOKEN environment variable to be set
+        for authentication.
+    """
+
+# TODO(cgrustas): Display the fetched activity in the terminal
+#   - Format events based on type (PushEvent, IssuesEvent, etc.)
+#   - Add color coding for different event types
+#   - Include timestamp for each activity
+#   - Handle pagination for users with many events
+def display_user_activity(user_activity):
+    """
+    Displays the fetched activity in the terminal.
+
+    Args: 
+        user_activity (list[dict]): List of GitHub event dictionaries
+    """
+    pass
 
 # region: "if __name__ == "__main__":" Learning Notes
 # We use 'if __name__ == "__main__":' so that when importing modules from a Python script, we can use the functions defined
