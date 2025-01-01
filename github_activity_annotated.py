@@ -39,13 +39,12 @@ def main():
     Gets the username, fetches activities, and displays results.
     """
     username = get_username()
-    print(username)
 
     # fetch the user’s recent activity using the GitHub API
     user_activity = get_user_activity(username)
 
     # TODO(cgrustas): Display the fetched activity in the terminal
-#    display_user_activity(user_activity)
+    display_user_activity(user_activity)
     
 def get_username():
     """
@@ -188,19 +187,84 @@ def get_user_activity(username):
         for authentication.
     """
 
-# TODO(cgrustas): Display the fetched activity in the terminal
-#   - Format events based on type (PushEvent, IssuesEvent, etc.)
-#   - Add color coding for different event types
-#   - Include timestamp for each activity
-#   - Handle pagination for users with many events
-def display_user_activity(user_activity):
+def display_user_activity(activities):
     """
     Displays the fetched activity in the terminal.
 
     Args: 
-        user_activity (list[dict]): List of GitHub event dictionaries
+        activities (list[dict]): List of GitHub event Dictionaries
     """
-    pass
+    if isinstance(activities, str) and activities.startswith("Error:"):
+        print(activities)
+        return    
+    if not activities:
+        print("No recent activity found.")
+        return
+
+    for event in activities: 
+        event_type = event["type"]
+        repo_name = event["repo"]["name"]
+        payload = event["payload"]
+        action = payload["action"].capitalize() if "action" in payload else ""
+        event_details = event_type
+
+        if event_type == "CommitCommentEvent":
+            event_details = f"{action} a commit comment"
+        elif event_type == "CreateEvent": 
+            event_details = f"Created a Git {payload["ref_type"]}"
+        elif event_type == "DeleteEvent":
+            event_details = f"Deleted a Git {payload["ref_type"]}"
+        elif event_type == "ForkEvent":
+            event_details = f"Forked a repository"
+        elif event_type == "GollumEvent":
+            event_details = f"{action} a wiki page"
+        elif event_type == "IssueCommentEvent":
+            event_details = f"{action} an issue comment"
+        elif event_type == "IssuesEvent":
+            event_details = f"{action} a new issue"
+        elif event_type == "MemberEvent":
+            if action == "Added":
+                print(f"- Added member to {repo_name}") 
+                continue # edge case, uses 'to' instead of 'in'
+            elif action == "Edited":
+                event_details = f"{action} changes to the collaborator permissions"
+            else: 
+                event_details = f"{action} MemberEvent"
+        elif event_type == "PublicEvent":
+            print(f"- Private repository {repo_name} is made public") 
+            continue # another edge case
+        elif event_type == "PullRequestEvent":
+            event_details = f"{action} pull request #{payload["number"]}"
+        elif event_type == "PullRequestReviewEvent":
+            event_details = f"{action} pull request review"
+        elif event_type == "PullRequestReviewCommentEvent":
+            event_details = f"{action} pull request review comment"
+        elif event_type == "PullRequestReviewThreadEvent":
+            if action == "Resolved":
+                event_details = f"{action} a comment thread on a pull request"
+            elif action == "Unresolved":
+                event_details = f"{action} a previously resolved comment thread on a pull request"
+            else:
+                event_details = f"There was a {event_type}"
+        elif event_type == "PushEvent":
+            if payload["size"] == 1: 
+                print(f"- {payload["size"]} commit to {repo_name}")
+            else:
+                print(f"- {payload["size"]} commits to {repo_name}")
+            continue
+        elif event_type == "ReleaseEvent":
+            event_details = f"{action} a release event"
+        elif event_type == "SponsorshipEvent":
+            event_details = f"{action} a sponsorship listing"
+        elif event_type == "WatchEvent":
+            if action == "Started":
+                event_details = f"Starred"
+            else:
+                event_details = f"There was a {event_type}"
+        else:
+            event_details = f"There was a {event_type}"
+        
+        print(f"- {event_details} in {repo_name}")
 
 # region: "if __name__ == "__main__":" Learning Notes
 # We use 'if __name__ == "__main__":' so that when importing modules from a Python script, we can use the functions defined

@@ -10,7 +10,7 @@ Date: 12/28/24
 """
 
 
-from github_activity_annotated import get_username, get_user_activities
+from github_activity_annotated import get_username, get_user_activity, display_user_activity
 import io
 import json
 import unittest
@@ -54,9 +54,9 @@ class TestGitHubActivityCLI(unittest.TestCase):
         Tests successful username extraction from command line
     test_get_username_no_args()
         Tests handling of missing command line arguments
-    test_get_user_activities_success()
+    test_get_user_activity_success()
         Tests successful GitHub API interaction
-    test_get_user_activities_error()
+    test_get_user_activity_error()
         Tests error handling for failed API requests
     """
     # TODO: add a docstring to the test class itself to describe what it's testing
@@ -220,8 +220,8 @@ class TestGitHubActivityCLI(unittest.TestCase):
 
         
 
-    # TODO: Write successful test for get_user_activities()
-    def test_get_user_activities_success(self): 
+    # TODO: Write successful test for get_user_activity()
+    def test_get_user_activity_success(self): 
         """Test successful GitHub API interaction and response parsing"""
         username = "testuser"
         
@@ -261,7 +261,7 @@ class TestGitHubActivityCLI(unittest.TestCase):
             # Therefore, we can configure '__enter__' to set up what will happen WHEN enter is called, not
             # after it's called. 
             
-            # In this case, when __enter__ is called in 'get_user_activities', it will receive 'mock_response'. 
+            # In this case, when __enter__ is called in 'get_user_activity', it will receive 'mock_response'. 
 
         # endregion
         # region: If the mock.patch() does not manage memory, why does it need to be placed in a "with" block? 
@@ -271,16 +271,16 @@ class TestGitHubActivityCLI(unittest.TestCase):
         # endregion
         with unittest.mock.patch('urllib.request.urlopen') as mock_urlopen:
             mock_urlopen.return_value.__enter__.return_value = mock_response
-            result = get_user_activities(username)
+            result = get_user_activity(username)
             
             # Verify the result is a list and matches our sample data
             self.assertIsInstance(result, list)
             self.assertEqual(result, self.sample_events_data)
 
 
-    # TODO: Write failed test for get_user_activities()
+    # TODO: Write failed test for get_user_activity()
     # This specifically tests our error handling code, and ensures that an Exception is raised
-    def test_get_user_activities_error(self):
+    def test_get_user_activity_error(self):
         """Test error handling for failed GitHub API requests"""
         username = "nonexistentuser"
 
@@ -292,7 +292,7 @@ class TestGitHubActivityCLI(unittest.TestCase):
                     # Run a function (if the Mock is a function)
             # endregion
             mock_urlopen.side_effect = Exception("API Error")
-            result = get_user_activities(username)
+            result = get_user_activity(username)
 
             self.assertIsInstance(result, str)
             # region: TODO: What is startswith()? 
@@ -305,9 +305,9 @@ def test_display_user_activity_success(self):
     """Test that the user activity is displayed correctly"""
     # Arrange: Use the sample data already defined in setUp()
     expected_output = [
-        "Pushed 3 commits to kamranahmedse/developer-roadmap",
-        "Opened a new issue in kamranahmedse/developer-roadmap",
-        "Starred kamranahmedse/developer-roadmap"
+        " - Pushed 3 commits to kamranahmedse/developer-roadmap",
+        " - Opened a new issue in kamranahmedse/developer-roadmap",
+        " - Starred kamranahmedse/developer-roadmap"
     ]
 
     # TODO: Act & Assert: Capture stdout and verify output
@@ -343,17 +343,10 @@ def test_display_user_activity_error(self):
     """Test handling of error response from API"""
     with unittest.mock.patch('sys.stdout', new=io.StringIO()) as mock_stdout:
         display_user_activity("invalidresponse") # redirects output stream to mock_stdout
-        assertEqual(
+        self.assertEqual(
             mock_stdout.getvalue().strip(),
             "Error: Unable to display GitHub activity"
         )
-
-
-
-
-
-
-    
 
 if __name__ == '__main__':
     unittest.main() # runs all tests just by running the file
