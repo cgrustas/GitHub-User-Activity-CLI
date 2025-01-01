@@ -138,6 +138,7 @@ def display_user_activity(activities):
         return
 
     # print user activity
+    print("Output:")
     for event in activities: 
         event_type = event["type"]
         repo_name = event["repo"]["name"]
@@ -185,9 +186,9 @@ def display_user_activity(activities):
                 event_details = f"There was a {event_type}"
         elif event_type == "PushEvent":
             if payload["size"] == 1: 
-                print(f"- {payload["size"]} commit to {repo_name}")
+                print(f"- Pushed {payload["size"]} commit to {repo_name}")
             else:
-                print(f"- {payload["size"]} commits to {repo_name}")
+                print(f"- Pushed {payload["size"]} commits to {repo_name}")
             continue
         elif event_type == "ReleaseEvent":
             event_details = f"{action} a release event"

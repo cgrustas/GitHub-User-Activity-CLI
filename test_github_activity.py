@@ -5,12 +5,12 @@ Author: Coleman Grustas
 Date: 1/1/25
 """
 
-
 from github_activity_annotated import get_username, get_user_activity, display_user_activity
 import io
 import json
 import unittest
 import unittest.mock
+
 
 class TestGitHubActivityCLI(unittest.TestCase):
     """
