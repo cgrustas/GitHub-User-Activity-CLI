@@ -54,7 +54,7 @@ Output:
 ```
 
 ## Credits
-- The inspiration for this project idea and requirements came from [roadmap.sh](url): [GitHub User Activity](https://roadmap.sh/projects/github-user-activity)
+The inspiration for this project idea and requirements came from [roadmap.sh](url): [GitHub User Activity](https://roadmap.sh/projects/github-user-activity)
 
 **Additional Sources**
 - [What is an API?](https://aws.amazon.com/what-is/api/)
