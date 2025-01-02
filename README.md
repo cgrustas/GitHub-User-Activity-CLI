@@ -60,6 +60,5 @@ Output:
 - [What is an API?](https://aws.amazon.com/what-is/api/)
 - [What is a REST API?](https://www.redhat.com/en/topics/api/what-is-a-rest-api)
 - [Documenting Python Code: A Complete Guide](https://realpython.com/documenting-python-code/)
-- [Claude.ai](https://claude.ai/new)
-- [GeeksforGeeks](https://www.geeksforgeeks.org/)
 - [How to Write a Good README File for Your GitHub Project](https://www.freecodecamp.org/news/how-to-write-a-good-readme-file/)
+- [GeeksforGeeks](https://www.geeksforgeeks.org/)
